@@ -1,0 +1,11 @@
+{
+  "name": "backend-foro-nodejs",
+  "version": "1.0.0",
+  "description": "API RESTful con NodeJS para un Foro.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hernán González Moreno",
+  "license": "MIT"
+}
