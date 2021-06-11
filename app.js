@@ -19,21 +19,5 @@ app.use( bodyParser.json() );
 // Reescribir rutas
 app.use( '/api', user_routes );
 
-// Rutas de prueba
-app.get( '/prueba-texto', (req, res) => {
-  return res.status(200).send( "<h1>Hola prueba-texto</h1>" );
-});
-
-app.post( '/prueba-texto', (req, res) => {
-  return res.status(200).send( "<h1>Hola por post prueba-texto</h1>" );
-});
-
-app.get( '/prueba-json', (req, res) => {
-  return res.status(200).send( {
-    title: 'Prueba json',
-    message: 'Hola json'
-  } );
-});
-
 // Exportar modulo
 module.exports = app;
