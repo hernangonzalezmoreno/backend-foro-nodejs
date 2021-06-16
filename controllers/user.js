@@ -76,6 +76,64 @@ var controller = {
 
     });
 
+  },
+
+  login: function (req, res){
+
+    // Recibimos los parametros de la peticion
+    let params = req.body;
+
+    // Validamos los datos
+    let validate_email = params.email && !validator.isEmpty( params.email ) && validator.isEmail( params.email );
+    let validate_password = params.password && !validator.isEmpty( params.password );
+
+    if( !validate_email || !validate_password ){
+      return res.status(400).send({
+        message: 'Error en los datos.'
+      });
+    }
+
+    // Buscamos al usuario en la Base de Datos
+    User.findOne( {email: params.email.toLowerCase()}, ( err, user ) => {
+
+      if( err ){
+        return res.status(500).send({
+          message: 'Error en la consulta a la base de datos.'
+        });
+      }
+
+      if( !user ){
+        return res.status(404).send({
+          message: 'El usuario no existe o hay un error en los datos introducidos.'
+        });
+      }
+
+      // DEBUG: En este momento el metodo compare de bcrypt no esta funcionando
+      console.log( "Pass: " + params.password );
+      console.log( "User: " + user.password );
+
+      // Comparamos las contrasenas
+      bcrypt.compare( params.password, user.password, (err, check) => {
+
+        if( err || !check ){
+          return res.status(400).send({
+            message: 'Error en las credenciales.'
+          });
+        }else{
+
+          // Quitamos algunos parametros del usuario antes de enviar la respuesta
+          user.password = undefined;
+
+          return res.status(200).send({
+            status: 'success',
+            user
+          });
+        }
+
+      });
+
+    });
+
   }
 
 };
