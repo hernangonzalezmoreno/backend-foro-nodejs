@@ -28,6 +28,7 @@ var controller = {
     user.name = params.name;
     user.surname = params.surname;
     user.email = params.email.toLowerCase();
+    user.password = params.password;
     user.image = null;
     user.role = 'ROLE_USER';
 
@@ -107,10 +108,6 @@ var controller = {
           message: 'El usuario no existe o hay un error en los datos introducidos.'
         });
       }
-
-      // DEBUG: En este momento el metodo compare de bcrypt no esta funcionando
-      console.log( "Pass: " + params.password );
-      console.log( "User: " + user.password );
 
       // Comparamos las contrasenas
       bcrypt.compare( params.password, user.password, (err, check) => {
