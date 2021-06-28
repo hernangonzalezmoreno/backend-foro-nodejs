@@ -3,6 +3,7 @@
 var validator = require('validator');
 var bcrypt = require('bcrypt-node');
 var User = require('../models/user');
+var jwt = require('../services/jwt');
 
 var controller = {
 
@@ -118,11 +119,15 @@ var controller = {
           });
         }else{
 
+          // Generamos el token con JWT
+          let token = jwt.createToken( user );
+
           // Quitamos algunos parametros del usuario antes de enviar la respuesta
           user.password = undefined;
 
           return res.status(200).send({
             status: 'success',
+            token: token,
             user
           });
         }
