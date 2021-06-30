@@ -154,6 +154,28 @@ var controller = {
       });
     }
 
+    // A minusculas
+    params.email = params.email.toLowerCase();
+
+    // Si cambio el email, debemos comprobar que el email no este siendo usado por otro usuario
+    if( req.user.email != params.email ){
+      // Comprobamos si el email ya existe en la base de datos
+      User.findOne( { email: params.email }, (err, issetUser ) => {
+
+        if( err ){
+          return res.status(500).send({
+            message: 'Error en la comprobación de email duplicado.'
+          });
+        }
+
+        if( issetUser ){
+          return res.status(500).send({
+            message: 'Ese email ya esta registrado por otro usuario.'
+          });
+        }
+      });
+    }
+
     // Removemos los datos a no actualizar
     delete params.role;
     delete params.password;
