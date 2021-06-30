@@ -136,6 +136,64 @@ var controller = {
 
     });
 
+  },
+
+  update: function (req, res){
+
+    // Obtenemos los datos
+    let params = req.body;
+
+    // Validamos los datos
+    let validate_name = params.name && !validator.isEmpty( params.name );
+    let validate_surname = params.surname && !validator.isEmpty( params.surname );
+    let validate_email = params.email && !validator.isEmpty( params.email ) && validator.isEmail( params.email );
+
+    if( !validate_name || !validate_surname || !validate_email ){
+      return res.status(400).send({
+        message: 'Error en los datos.'
+      });
+    }
+
+    // Removemos los datos a no actualizar
+    delete params.role;
+    delete params.password;
+
+    // Tomamos el id de usuario
+    let user_id = req.user.sub;
+
+    // Buscamos y actualizamos el documento
+    // findOneAndUpdate 4 parametros:
+    //    1) condicion/where
+    //    2) los nuevos valores a guardar
+    //    3) Opciones, con {new:true} indicamos que nos devuelva un nuevo objeto
+    //    4) funcion de callback(err, userUpdated), respuesta de la actualizacion
+    User.findOneAndUpdate( {_id: user_id}, params, {new:true}, (err, userUpdated) => {
+
+      if( err ){
+        return res.status(500).send({
+          status: 'error',
+          message: 'Error con la base de datos: ' + err
+        });
+      }
+
+      if( !userUpdated ){
+        return res.status(200).send({
+          status: 'error',
+          message: 'No se pudo actualizar el usuario.'
+        });
+      }
+
+      // No devolvemos el password por seguridad
+      userUpdated.password = undefined;
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Usuario actualizado.',
+        user: userUpdated
+      });
+
+    });
+
   }
 
 };
