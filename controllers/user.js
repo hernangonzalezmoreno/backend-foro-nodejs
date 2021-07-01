@@ -295,6 +295,52 @@ var controller = {
         });
       }
     });
+  },
+
+  getUsers: function (req, res){
+    // Pedimos todos los usuarios
+    User.find().exec( (err, users) => {
+      if( err || !users ){
+        return res.status(404).send({
+          status: 'error',
+          message: err? 'Error al buscar.' : 'No hay usuarios'
+        });
+      }
+
+      // Quitamos los passwords antes de devolver los usuarios
+      users.forEach((item) => {
+        item.password = undefined;
+      });
+
+      return res.status(200).send({
+        status: 'success',
+        users
+      });
+    });
+  },
+
+  getUser: function (req, res){
+    // Obtenemos el ID del usuario que debemos devolver
+    let user_id = req.params.user_id;
+
+    User.findById( user_id ).exec( (err, user) => {
+      if( err || !user ){
+        return res.status(404).send({
+          status: 'error',
+          message: err? 'Error al obtener el usuario.' : 'Usuario no encontrado.'
+        });
+      }
+
+      // Quitamos el password antes de devolver
+      user.password = undefined;
+
+      return res.status(200).send({
+        status: 'success',
+        user
+      });
+
+    });
+
   }
 
 };
