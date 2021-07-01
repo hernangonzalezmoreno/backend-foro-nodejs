@@ -279,6 +279,22 @@ var controller = {
 
     });
 
+  },
+
+  avatar: function (req, res){
+    let file_name = req.params.file_name;
+    let file_path = './uploads/users/' + file_name;
+
+    fs.exists( file_path, (exists) => {
+      if( exists ){
+        return res.sendFile( path.resolve( file_path ) );
+      }else{
+        return res.status(404).send({
+          status: 'error',
+          message: 'Imange no encontrada.'
+        });
+      }
+    });
   }
 
 };
