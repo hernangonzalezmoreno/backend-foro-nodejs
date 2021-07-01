@@ -175,6 +175,24 @@ var controller = {
 
     });
 
+  },
+
+  delete: function(req, res){
+    let topic_id = req.params.topic_id;
+    let user_id = req.user.sub;
+
+    Topic.findOneAndDelete( { _id: topic_id, user: user_id }, (err, topicRemoved) => {
+      if( err || !topicRemoved ){
+        return res.status( err? 500 : 400 ).send({
+          status: 'error',
+          message: err? 'Error al intentar borrar el topic' : 'No se pudo borrar el topic.'
+        });
+      }
+      return res.status( 200 ).send({
+        status: 'success',
+        topicRemoved
+      });
+    });
   }
 
 }
