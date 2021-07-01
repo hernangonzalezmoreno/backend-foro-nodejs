@@ -107,6 +107,29 @@ var controller = {
 
     });
 
+  },
+
+  getTopic: function (req, res){
+    let topic_id = req.params.topic_id;
+
+    Topic.findById( topic_id )
+    .populate( 'user' )
+    .exec( (err, topic) => {
+
+      if( err || !topic ){
+        return res.status( err? 500 : 404 ).send({
+          status: 'error',
+          message: err? 'Error al consultar el topic.' : 'Topic no encontrado.'
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        topic
+      });
+
+    });
+
   }
 
 }
