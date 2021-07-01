@@ -130,6 +130,51 @@ var controller = {
 
     });
 
+  },
+
+  update: function (req, res){
+    let topic_id = req.params.topic_id;
+    let user_id = req.user.sub;
+
+    let body = req.body;
+
+    // Validamos los datos
+    let validate_title = body.title && !validator.isEmpty( body.title );
+    let validate_content = body.content && !validator.isEmpty( body.content );
+    let validate_lang = body.lang && !validator.isEmpty( body.lang );
+
+    if( !validate_title || !validate_content || !validate_lang ){
+      return res.status(400).send({
+        status: 'error',
+        message: 'Los datos no son validos.'
+      });
+    }
+
+    // Contruimos el JSON para la actualizacion
+    let datos = {
+      title: body.title,
+      content: body.content,
+      code: body.code,
+      lang: body.lang
+    }
+
+    // Actualizamos con el metodo findOneAndUpdate
+    Topic.findOneAndUpdate( { _id: topic_id, user: user_id }, datos, {new: true}, (err, topic) => {
+
+      if( err || !topic ){
+        return res.status( err? 500 : 400 ).send({
+          status: 'error',
+          message: err? 'Error al actualizar el topic.' : 'No se pudo actualizar el topic.'
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        topic
+      });
+
+    });
+
   }
 
 }
