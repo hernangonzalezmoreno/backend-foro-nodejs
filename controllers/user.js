@@ -130,7 +130,7 @@ var controller = {
           let token = jwt.createToken( user );
 
           // Quitamos algunos parametros del usuario antes de enviar la respuesta
-          user.password = undefined;
+          // user.password = undefined; // ya no hace falta porque lo hago desde el Modelo
 
           return res.status(200).send({
             status: 'success',
@@ -213,7 +213,7 @@ var controller = {
       }
 
       // No devolvemos el password por seguridad
-      userUpdated.password = undefined;
+      // userUpdated.password = undefined; // ya no hace falta porque lo hago desde el Modelo
 
       return res.status(200).send({
         status: 'success',
@@ -308,9 +308,9 @@ var controller = {
       }
 
       // Quitamos los passwords antes de devolver los usuarios
-      users.forEach((item) => {
-        item.password = undefined;
-      });
+      // users.forEach((item) => { // ya no hace falta porque lo hago desde el Modelo
+      //   item.password = undefined;
+      // });
 
       return res.status(200).send({
         status: 'success',
@@ -332,7 +332,7 @@ var controller = {
       }
 
       // Quitamos el password antes de devolver
-      user.password = undefined;
+      // user.password = undefined; // ya no hace falta porque lo hago desde el Modelo
 
       return res.status(200).send({
         status: 'success',

@@ -12,4 +12,12 @@ var UserSchema = Schema({
   role: String
 });
 
+// Sobreescribimos el metodo toJSON
+// para que siempre que pidamos un usuario, no nos traiga la password
+UserSchema.methods.toJSON = function (){
+  let obj = this.toObject();
+  delete obj.password;
+  return obj;
+}
+
 module.exports = mongoose.model( 'User', UserSchema );
