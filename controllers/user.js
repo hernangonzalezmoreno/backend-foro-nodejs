@@ -146,9 +146,14 @@ var controller = {
   },
 
   update: function (req, res){
+    // Tomamos el id de usuario
+    let user_id = req.user.sub;
 
     // Obtenemos los datos
     let params = req.body;
+    // Removemos los datos ha no actualizar
+    delete params.role;
+    delete params.password;
 
     // Validamos los datos
     let validate_name = params.name && !validator.isEmpty( params.name );
@@ -164,64 +169,58 @@ var controller = {
     // A minusculas
     params.email = params.email.toLowerCase();
 
-    // Si cambio el email, debemos comprobar que el email no este siendo usado por otro usuario
-    if( req.user.email != params.email ){
-      // Comprobamos si el email ya existe en la base de datos
-      User.findOne( { email: params.email }, (err, issetUser ) => {
-
-        if( err ){
-          return res.status(500).send({
-            message: 'Error en la comprobación de email duplicado.'
-          });
-        }
-
-        if( issetUser ){
-          return res.status(500).send({
-            message: 'Ese email ya esta registrado por otro usuario.'
-          });
-        }
-      });
-    }
-
-    // Removemos los datos a no actualizar
-    delete params.role;
-    delete params.password;
-
-    // Tomamos el id de usuario
-    let user_id = req.user.sub;
-
-    // Buscamos y actualizamos el documento
-    // findOneAndUpdate 4 parametros:
-    //    1) condicion/where
-    //    2) los nuevos valores a guardar
-    //    3) Opciones, con {new:true} indicamos que nos devuelva un nuevo objeto
-    //    4) funcion de callback(err, userUpdated), respuesta de la actualizacion
-    User.findOneAndUpdate( {_id: user_id}, params, {new:true}, (err, userUpdated) => {
+    // Comprobamos si el email ya existe en la base de datos
+    User.findOne( { email: params.email }, (err, issetUser) => {
 
       if( err ){
         return res.status(500).send({
           status: 'error',
-          message: 'Error con la base de datos: ' + err
+          message: 'Error en la comprobación de email duplicado.'
         });
       }
 
-      if( !userUpdated ){
-        return res.status(200).send({
+      // Si el email le pertenece a otro usuario, retornamos aca
+      if( issetUser && issetUser._id != user_id ){
+        return res.status(500).send({
           status: 'error',
-          message: 'No se pudo actualizar el usuario.'
+          message: 'Ese email ya esta registrado por otro usuario.'
         });
       }
 
-      // No devolvemos el password por seguridad
-      // userUpdated.password = undefined; // ya no hace falta porque lo hago desde el Modelo
+      // Buscamos y actualizamos el documento
+      // findOneAndUpdate 4 parametros:
+      //    1) condicion/where
+      //    2) los nuevos valores a guardar
+      //    3) Opciones, con {new:true} indicamos que nos devuelva un nuevo objeto
+      //    4) funcion de callback(err, userUpdated), respuesta de la actualizacion
+      User.findOneAndUpdate( {_id: user_id}, params, {new:true}, (err, userUpdated) => {
 
-      return res.status(200).send({
-        status: 'success',
-        message: 'Usuario actualizado.',
-        user: userUpdated
-      });
+        if( err ){
+          return res.status(500).send({
+            status: 'error',
+            message: 'Error con la base de datos: ' + err
+          });
+        }
 
-    });
+        if( !userUpdated ){
+          return res.status(200).send({
+            status: 'error',
+            message: 'No se pudo actualizar el usuario.'
+          });
+        }
+
+        // No devolvemos el password por seguridad
+        // userUpdated.password = undefined; // ya no hace falta porque lo hago desde el Modelo
+
+        return res.status(200).send({
+          status: 'success',
+          message: 'Usuario actualizado.',
+          user: userUpdated
+        });
+
+      });// end actualizacion del usuario en la base de datos
+
+    });// end comprobacion del email en la base de datos
 
   },
 
