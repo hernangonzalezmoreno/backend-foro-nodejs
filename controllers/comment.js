@@ -105,6 +105,52 @@ var controller = {
   },
 
   delete: function(req, res){
+    let user_id = req.user.sub;
+    let topic_id = req.params.topic_id;
+    let comment_id = req.params.comment_id;
+
+    // Buscamos el topic
+    Topic.findById( topic_id, (err, topic) => {
+
+      if( err || !topic ){
+        return res.status( err? 500 : 404 ).send({
+          status: 'error',
+          message: err? 'Error al buscar el topic.' : 'No se encontro el topic.'
+        });
+      }
+
+      // Tomamos el comentario
+      let comment = topic.comments.id( comment_id );
+
+      // Comprobamos que exista el comentario y que le pertenezca al usuario autentificado
+      if( !comment || comment.user != user_id ){
+        return res.status( !comment? 404 : 403).send({
+          status: 'error',
+          message: !comment? 'No se encontro el comentario.' : 'No tiene permisos para eliminar el comentario.'
+        });
+      }
+
+      // Eliminamos el comentario
+      comment.remove();
+
+      // Salvamos los cambios
+      topic.save( err => {
+
+        if( err ){
+          return res.status(500).send({
+            status: 'error',
+            message: 'Error al borrar el comentario.'
+          });
+        }
+
+        return res.status(200).send({
+          status: 'success',
+          topic
+        });
+
+      });
+
+    });
 
   }
 
