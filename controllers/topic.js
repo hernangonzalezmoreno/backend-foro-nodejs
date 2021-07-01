@@ -193,6 +193,34 @@ var controller = {
         topicRemoved
       });
     });
+  },
+
+  search: function (req, res){
+    let search_value = req.params.search_value;
+
+    Topic.find({ "$or": [
+      { "title": { "$regex": search_value, "$options": "i" } },
+      { "content": { "$regex": search_value, "$options": "i" } },
+      { "code": { "$regex": search_value, "$options": "i" } },
+      { "lang": { "$regex": search_value, "$options": "i" } },
+    ]})
+    .sort( [ ['date','descending'] ] ) // ordenamos de forma descendiente segun la fecha
+    .exec( (err, topics) => {
+
+      if( err || !topics ){
+        return res.status( err? 500 : 404 ).send({
+          status: 'error',
+          message: err? 'Error en la busqueda.' : 'No se encontraron resultados'
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        topics
+      });
+
+    });
+
   }
 
 }
