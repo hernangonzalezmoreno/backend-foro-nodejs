@@ -84,6 +84,29 @@ var controller = {
 
     });
 
+  },
+
+  getTopicsByUser: function (req, res){
+    let user_id = req.params.user_id;
+
+    Topic.find( {user: user_id} )
+    .sort( [ ['date','descending'] ] ) // ordenamos de forma descendiente segun la fecha
+    .exec( (err, topics) => {
+
+      if( err || !topics ){
+        return res.status( err? 500 : 404 ).send({
+          status: 'error',
+          message: err? 'Error al consultar los topics.' : 'Topics no encontrados.'
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        topics
+      });
+
+    });
+
   }
 
 }
