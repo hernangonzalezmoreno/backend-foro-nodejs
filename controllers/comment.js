@@ -61,6 +61,46 @@ var controller = {
   },
 
   update: function(req, res){
+    let user_id = req.user.sub;
+    let comment_id = req.params.comment_id;
+    let body = req.body;
+
+    // Validamos los datos
+    let validate_content = body.content && !validator.isEmpty( body.content );
+
+    if( !validate_content ){
+      return res.status(400).send({
+        status: 'error',
+        message: 'Los datos no son validos.'
+      });
+    }
+
+    // Actualizamos un subdocumento del topic
+    // Faltaria asegurarse que el comentario le pertenece al usuario autentificado
+    Topic.findOneAndUpdate(
+      { 'comments._id': comment_id },
+      {
+        '$set': {
+          'comments.$.content': body.content
+        }
+      },
+      { new: true },
+      (err, topicUpdated) => {
+
+        if( err || !topicUpdated ){
+          return res.status( err? 500 : 404).send({
+            status: 'error',
+            message: err? 'Error al actualizar el comentario.' : 'No se pudo actualizar el comentario.'
+          });
+        }
+
+        return res.status(200).send({
+          status: 'success',
+          topicUpdated
+        });
+
+      }
+    );
 
   },
 
