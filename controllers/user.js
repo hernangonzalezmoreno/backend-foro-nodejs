@@ -1,7 +1,14 @@
 'use strict'
 
+// Librerias nativas de NodeJS
+var fs = require('fs'); // para borrar archivos
+var path = require('path');
+
+// Librerias importadas
 var validator = require('validator');
 var bcrypt = require('bcrypt-node');
+
+// Modelos y servicios
 var User = require('../models/user');
 var jwt = require('../services/jwt');
 
@@ -211,6 +218,62 @@ var controller = {
       return res.status(200).send({
         status: 'success',
         message: 'Usuario actualizado.',
+        user: userUpdated
+      });
+
+    });
+
+  },
+
+  uploadAvatar: function (req, res){
+    // Comprobamos que el usuario envio un archivo
+    // Tenemos acceso a req.files porque este metodo esta usando el middleware de multiparty
+    if( !req.files.file0 ){
+      return res.status(400).send({
+        status: 'error',
+        message: 'No se subio el archivo.'
+      });
+    }
+
+    let file_path = req.files.file0.path;
+    let file_name = file_path.split('/')[2];
+    let file_ext = file_name.split('.')[1];
+
+    console.log( 'path: ' + file_path + '\r\nname: ' + file_name + '\r\next: ' + file_ext );
+
+    // Comprobamos que sea una extencion valida
+    if( file_ext != 'png' && file_ext != 'jpg' && file_ext != 'jpeg' && file_ext != 'gif' ){
+      // Si no es valido, debemos borrar el archivo, para eso usamos la libreria 'fs'
+      fs.unlink( file_path, (err) => { // callback asincrono
+        if( !err )
+          console.log( 'Archivo eliminado' );
+        else
+          console.log( 'Error al eliminar archivo' );
+      });
+
+      return res.status(400).send({
+        status: 'error',
+        message: 'Extencion del archivo no valido.'
+      });
+
+    }
+
+    // Obtenemos el id del usuario
+    let user_id = req.user.sub;
+
+    // Actualizamos el avatar del usuario
+    User.findOneAndUpdate( { _id: user_id }, { image: file_name }, { new: true }, (err, userUpdated) => {
+
+      if( err || !userUpdated ){
+        return res.status(500).send({
+          status: 'error',
+          message: 'No se a podido actualizar el avatar.',
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        message: 'Archivo subido.',
         user: userUpdated
       });
 
