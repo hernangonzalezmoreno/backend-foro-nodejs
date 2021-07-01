@@ -27,6 +27,7 @@ var controller = {
     topic.content = paramsPost.content;
     topic.code = paramsPost.code;
     topic.lang = paramsPost.lang;
+    topic.user = req.user.sub;
 
     // Guardamos el objeto
     topic.save( (err, topicStored) => {
@@ -44,7 +45,45 @@ var controller = {
       });
 
     });
-    
+
+  },
+
+  getTopics: function (req, res){
+
+    // Tomamos el parametro de paginacion
+    let page = 1;
+    if( req.params.page && parseInt( req.params.page ) ){
+      page = parseInt( req.params.page );
+    }
+
+    // Seteamos las opciones de paginacion
+    const opciones = {
+      sort: { date: -1 }, // 1 para ordenarlo de mas antiguo a mas nuevo, -1 de mas nuevo a mas antiguo
+      populate: 'user', // Populamos el id guardado con el usuario que corresponda
+      limit: 5, // El numero de entradas por pagina
+      page: page
+    }
+
+    // Hacemos la consulta
+    // Primer parametro condicion, segundo opciones, tercero callback
+    Topic.paginate( {}, opciones, (err, result) => {
+
+      if( err || !result ){
+        return res.status( err? 500 : 404 ).send({
+          status: 'error',
+          message: err? 'Error en la consulta.' : 'No hay documentos.'
+        });
+      }
+
+      return res.status( 200 ).send({
+        status: 'success',
+        topics: result.docs,
+        totalDocs: result.totalDocs,
+        totalPages: result.totalPages
+      });
+
+    });
+
   }
 
 }
